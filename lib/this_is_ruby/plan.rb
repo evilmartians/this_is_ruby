@@ -7,9 +7,9 @@ module ThisIsRuby
 
     attr_reader :repo, :emissions, :declared
 
-    def self.build(repo, attributes:, all_frontend: false)
+    def self.build(repo, attributes:, frontend: true)
       spoken_for = spoken_for(attributes.existing_attributes)
-      found = Rules.for_level(all_frontend:).flat_map { |rule| rule.apply(repo) }
+      found = Rules.for_level(frontend:).flat_map { |rule| rule.apply(repo) }
       declared, emissions = found.partition do |emission|
         spoken_for.any? { |pattern| covers?(pattern, emission.pattern) }
       end

@@ -7,10 +7,10 @@ module ThisIsRuby
   # Rules never guess: when the evidence is not on disk they return nothing,
   # so a project that has no coverage report gets no line about one.
   #
-  # :safe rules find files a tool produced, and always run. :frontend rules
-  # find hand-written sources, and run only with --all-frontend, because
-  # excluding those is the owner's call about what their repository is rather
-  # than a fact about who typed the file.
+  # :safe rules find files a tool produced. :frontend rules find hand-written
+  # sources, which is a claim about what the repository is rather than about
+  # who typed the file; both run by default, and --no-frontend drops the
+  # second group for a project whose frontend really is the point.
   class Rule
     LEVELS = %i[safe frontend].freeze
 

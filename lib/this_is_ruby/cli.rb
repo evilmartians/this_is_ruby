@@ -27,7 +27,7 @@ module ThisIsRuby
       @argv = argv
       @out = out
       @err = err
-      @options = {path: ".", all_frontend: false, color: out.tty?}
+      @options = {path: ".", frontend: true, color: out.tty?}
     end
 
     def call
@@ -38,7 +38,7 @@ module ThisIsRuby
 
       repo = Repo.at(@options[:path])
       attributes = AttributesFile.new(repo.root.join(".gitattributes"))
-      plan = Plan.build(repo, attributes:, all_frontend: @options[:all_frontend])
+      plan = Plan.build(repo, attributes:, frontend: @options[:frontend])
       report = Report.new(plan, out: @out, color: @options[:color])
 
       send(command, plan, attributes, report)
@@ -78,7 +78,10 @@ module ThisIsRuby
       parser = OptionParser.new do |opts|
         opts.banner = USAGE
         opts.on("--path DIR", "repository to inspect (default: .)") { |dir| @options[:path] = dir }
-        opts.on("--all-frontend", "also mark hand-written frontend sources as vendored") { @options[:all_frontend] = true }
+        opts.on("--[no-]frontend", "mark hand-written frontend sources as vendored (default: yes)") { |on| @options[:frontend] = on }
+        # 0.1.x asked for this behaviour with a flag. It is the default now, so
+        # accept the old name rather than break anyone's CI step.
+        opts.on("--all-frontend", "deprecated alias, now the default") { @options[:frontend] = true }
         opts.on("--[no-]color", "colourise output") { |on| @options[:color] = on }
         opts.on("-v", "--version", "print the version") do
           @out.puts VERSION

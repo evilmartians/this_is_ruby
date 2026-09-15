@@ -91,7 +91,7 @@ RSpec.describe ThisIsRuby::Plan do
       "app/javascript/pages/home.tsx" => "export default function Home() {}"
     )
     attributes = ThisIsRuby::AttributesFile.new(repo.root.join(".gitattributes"))
-    plan = described_class.build(repo, attributes:, all_frontend: true)
+    plan = described_class.build(repo, attributes:)
 
     expect(plan.emissions.map(&:pattern)).to eq(["app/javascript/**"])
   end
@@ -102,7 +102,7 @@ RSpec.describe ThisIsRuby::Plan do
       "app/javascript/components/ui/button.tsx" => "export const Button = () => null"
     )
     attributes = ThisIsRuby::AttributesFile.new(repo.root.join(".gitattributes"))
-    plan = described_class.build(repo, attributes:)
+    plan = described_class.build(repo, attributes:, frontend: false)
 
     expect(plan.emissions.map(&:pattern)).to eq(["app/javascript/components/ui/**"])
   end

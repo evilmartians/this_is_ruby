@@ -20,8 +20,8 @@ RSpec.describe ThisIsRuby::Repo do
 end
 
 RSpec.describe ThisIsRuby::Rules do
-  def patterns_for(repo, all_frontend: false)
-    described_class.for_level(all_frontend:)
+  def patterns_for(repo, frontend: true)
+    described_class.for_level(frontend:)
       .flat_map { |rule| rule.apply(repo) }
       .map(&:line)
   end
@@ -96,22 +96,24 @@ RSpec.describe ThisIsRuby::Rules do
       }
     end
 
+    # With the frontend rule on, `app/javascript/**` covers these anyway. These
+    # examples pin the shadcn rule itself, which is what --no-frontend leaves.
     it "vendors the generator's directory and nothing else" do
-      expect(patterns_for(build_repo(files)))
+      expect(patterns_for(build_repo(files), frontend: false))
         .to eq(["app/javascript/components/ui/** linguist-vendored"])
     end
 
     it "claims nothing without the generator's config" do
-      expect(patterns_for(build_repo(files.except("components.json")))).to be_empty
+      expect(patterns_for(build_repo(files.except("components.json")), frontend: false)).to be_empty
     end
   end
 
-  describe "--all-frontend" do
-    it "is silent unless asked for" do
+  describe "frontend sources" do
+    it "are vendored by default, and kept by --no-frontend" do
       repo = build_repo("app/javascript/pages/home.tsx" => "export default function Home() {}")
 
-      expect(patterns_for(repo)).to be_empty
-      expect(patterns_for(repo, all_frontend: true)).to eq(["app/javascript/** linguist-vendored"])
+      expect(patterns_for(repo)).to eq(["app/javascript/** linguist-vendored"])
+      expect(patterns_for(repo, frontend: false)).to be_empty
     end
 
     it "vendors rather than generates, so diffs keep working" do
@@ -127,6 +129,6 @@ RSpec.describe ThisIsRuby::Rules do
       "vendor/javascript/turbo.js" => "// turbo"
     )
 
-    expect(patterns_for(repo, all_frontend: true)).to be_empty
+    expect(patterns_for(repo)).to be_empty
   end
 end

@@ -1,8 +1,13 @@
 # Changelog
 
-## 0.1.2
+## 0.2.0
 
-- Reword the gem summary and description. No code change.
+- Frontend sources are vendored by default. Telling GitHub a project is Ruby is
+  what the gem is for, and it read oddly to name that after a flag most people
+  would never pass. `--no-frontend` keeps them counted, for a repository whose
+  frontend really is the point. `--all-frontend` is still accepted and does
+  nothing, so an existing CI step keeps working.
+- Reword the summary and description.
 
 ## 0.1.1
 

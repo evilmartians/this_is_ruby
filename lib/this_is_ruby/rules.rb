@@ -121,7 +121,7 @@ module ThisIsRuby
       Rule.new(
         key: :frontend_sources,
         attribute: "linguist-vendored",
-        summary: "frontend sources, excluded at your request (--all-frontend)",
+        summary: "frontend sources (pass --no-frontend to keep them counted)",
         level: :frontend
       ) do |repo|
         present = FRONTEND_ROOTS.select { |dir| under(repo, dir).any? }
@@ -129,8 +129,8 @@ module ThisIsRuby
       end
     ].freeze
 
-    def for_level(all_frontend:)
-      all_frontend ? ALL : ALL.select(&:safe?)
+    def for_level(frontend:)
+      frontend ? ALL : ALL.select(&:safe?)
     end
   end
 end

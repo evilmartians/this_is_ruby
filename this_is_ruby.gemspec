@@ -12,11 +12,12 @@ Gem::Specification.new do |spec|
   # Kept as two paragraphs of unbroken sentences: RubyGems renders the
   # description verbatim, so source-level wrapping shows up on the gem page.
   spec.description = [
-    "GitHub decides a repository's language by counting bytes, so Ruby gets " \
-    "outnumbered by sheer volume of JS/TS/HTML boilerplate and your repo gets " \
-    "labelled HTML or TypeScript.",
-    "This gem gives you the controls. It finds the files nobody wrote and " \
-    "writes the .gitattributes overrides GitHub already understands."
+    "Ruby is one of the most eloquent and efficient languages, but it gets " \
+    "punished for it by GitHub's language attribution. Even more so, a Rails " \
+    "app, carefully designed to require next to no boilerplate code, easily " \
+    "ends up with less Ruby than JS, TS or HTML (ERB).",
+    "This gem tells GitHub: this is Ruby, by marking your frontend as " \
+    "\"linguist-vendored\". No side effects on diffs or other DX."
   ].join("\n\n")
   spec.homepage = "https://github.com/evilmartians/this_is_ruby"
   spec.license = "MIT"

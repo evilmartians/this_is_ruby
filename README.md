@@ -3,9 +3,9 @@
 [![Gem](https://img.shields.io/gem/v/this_is_ruby)](https://rubygems.org/gems/this_is_ruby)
 [![CI](https://github.com/evilmartians/this_is_ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/evilmartians/this_is_ruby/actions/workflows/ci.yml)
 
-GitHub decides a repository's language by counting bytes. Ruby code can often be outnumbered by sheer volume of JS/TS/HTML boilerplate. So GitHub labels the repo HTML or TypeScript.
+Ruby is one of the most eloquent and efficient languages, but it gets punished for it by GitHub's language attribution. A repository's language there is whichever one has the most bytes, and a Rails app, carefully designed to require next to no boilerplate code, easily ends up with less Ruby than JS, TS or HTML (ERB).
 
-This gem gives you controls.
+This gem tells GitHub: this is Ruby, by marking your frontend as `linguist-vendored`. No side effects on diffs or other DX.
 
 ## Install
 
@@ -40,24 +40,25 @@ $ this_is_ruby check    # exit 1 when .gitattributes is out of date
 | SimpleCov HTML reports, found by the report's own title | `linguist-generated` |
 | `db/structure.sql`, matching how Rails already treats `db/schema.rb` | `linguist-generated` |
 | shadcn/ui components, when `components.json` shows a generator put them there | `linguist-vendored` |
+| your frontend sources: `app/javascript/`, `app/frontend/`, `frontend/` | `linguist-vendored` |
 
 
-By default the gem only points at files a tool produced. On [inertia-rails/react-starter-kit][irsk], where GitHub counts TypeScript at 60.6%, that clears the HTML but leaves TypeScript the primary language.
+[irinanazarova/react-starter-kit-this-is-ruby][demo] is a fork of the Inertia Rails starter kit whose only change is the sixteen lines `this_is_ruby` wrote. Upstream, GitHub counts it as 60.6% TypeScript and 21.2% Ruby. The fork reads **82.6% Ruby, 1.1% TypeScript**. Compare its language bar with [the upstream one][irsk].
 
-## Make it Ruby
+## If your frontend really is the point
 
-If you think that despite a huge amount of hand-written JS/TS/HTML, the important work in your repository is Ruby, you can say so:
+Some repositories genuinely are TypeScript projects, and for those:
 
 ```console
-$ this_is_ruby --all-frontend
+$ this_is_ruby --no-frontend
 ```
-On the same repository that marks `app/javascript/` as `linguist-vendored`, and
-GitHub then counts it as **82.6% Ruby, 1.1% TypeScript**. That is not an
-estimate: [irinanazarova/react-starter-kit-this-is-ruby][demo] is a fork of the
-kit whose only change is the sixteen lines this command wrote. Compare its
-language bar with [the upstream one][irsk].
 
-The one line that matters is which attribute it uses. [Generated files are suppressed in diffs][docs]; vendored files are not. So `--all-frontend` emits `linguist-vendored`, every source file keeps showing up in full in pull requests, and the only thing that changes is the color of the bar at the top of the page:
+That keeps your frontend in the count and marks only what a tool produced: the
+table above minus the last row.
+
+## Why vendored and not generated
+
+The one line that matters is which attribute it uses. [Generated files are suppressed in diffs][docs]; vendored files are not. So your frontend is marked `linguist-vendored`, every source file keeps showing up in full in pull requests, and the only thing that changes is the color of the bar at the top of the page:
 
 ```console
 $ git check-attr linguist-vendored linguist-generated -- app/javascript/pages/home/index.tsx
@@ -77,8 +78,7 @@ On GitHub itself:
   plainly: these files "are suppressed in diffs". Reviewers get a "Load diff"
   button instead of the patch. The gem uses this attribute only for tool
   output; everything hand-written gets `linguist-vendored`, which leaves diffs
-  alone. That is why `--all-frontend` vendors your frontend rather than
-  marking it generated.
+  alone. That is why your frontend is vendored rather than marked generated.
 - **Code search still indexes the files.** They stay findable, and GitHub adds
   `is:generated` and `is:vendored` filters, so a query written as
   `-is:vendored` will skip them.
