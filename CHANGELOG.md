@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- Reword the gem summary and description. No code change.
+
 ## 0.1.1
 
 - The "now" column no longer counts files that are already out of GitHub's

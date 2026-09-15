@@ -8,14 +8,16 @@ Gem::Specification.new do |spec|
   spec.authors = ["Irina Nazarova"]
   spec.email = ["inazarova@evilmartians.com"]
 
-  spec.summary = "Tell GitHub which files in your Ruby project nobody wrote"
-  spec.description = <<~TEXT
-    GitHub picks a repository's language by counting bytes, and a Rails app
-    carries plenty it never authored: generated error pages, compiled assets,
-    coverage reports, components copied in by a frontend generator. Together
-    they routinely outweigh the app's own Ruby. this_is_ruby finds them and
-    writes the .gitattributes overrides Linguist already understands.
-  TEXT
+  spec.summary = "Tell GitHub your project is Ruby."
+  # Kept as two paragraphs of unbroken sentences: RubyGems renders the
+  # description verbatim, so source-level wrapping shows up on the gem page.
+  spec.description = [
+    "GitHub decides a repository's language by counting bytes, so Ruby gets " \
+    "outnumbered by sheer volume of JS/TS/HTML boilerplate and your repo gets " \
+    "labelled HTML or TypeScript.",
+    "This gem gives you the controls. It finds the files nobody wrote and " \
+    "writes the .gitattributes overrides GitHub already understands."
+  ].join("\n\n")
   spec.homepage = "https://github.com/evilmartians/this_is_ruby"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
