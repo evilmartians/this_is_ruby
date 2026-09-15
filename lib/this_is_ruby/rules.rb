@@ -121,7 +121,7 @@ module ThisIsRuby
       Rule.new(
         key: :frontend_sources,
         attribute: "linguist-vendored",
-        summary: "frontend sources (pass --no-frontend to keep them counted)",
+        summary: "frontend sources (pass --fair to keep them counted)",
         level: :frontend
       ) do |repo|
         present = FRONTEND_ROOTS.select { |dir| under(repo, dir).any? }

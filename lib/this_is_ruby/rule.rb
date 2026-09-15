@@ -9,8 +9,8 @@ module ThisIsRuby
   #
   # :safe rules find files a tool produced. :frontend rules find hand-written
   # sources, which is a claim about what the repository is rather than about
-  # who typed the file; both run by default, and --no-frontend drops the
-  # second group for a project whose frontend really is the point.
+  # who typed the file; both run by default, and --fair drops the second group
+  # for a project whose frontend really is the point.
   class Rule
     LEVELS = %i[safe frontend].freeze
 

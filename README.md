@@ -50,11 +50,12 @@ $ this_is_ruby check    # exit 1 when .gitattributes is out of date
 Some repositories genuinely are TypeScript projects, and for those:
 
 ```console
-$ this_is_ruby --no-frontend
+$ this_is_ruby --fair
 ```
 
-That keeps your frontend in the count and marks only what a tool produced: the
-table above minus the last row.
+That marks only the files nobody in the project wrote: every generated row in
+the table above, plus the shadcn components a generator copied in. Your own
+frontend keeps counting.
 
 ## Why vendored and not generated
 

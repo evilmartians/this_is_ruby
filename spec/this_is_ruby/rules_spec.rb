@@ -97,7 +97,7 @@ RSpec.describe ThisIsRuby::Rules do
     end
 
     # With the frontend rule on, `app/javascript/**` covers these anyway. These
-    # examples pin the shadcn rule itself, which is what --no-frontend leaves.
+    # examples pin the shadcn rule itself, which is what --fair leaves.
     it "vendors the generator's directory and nothing else" do
       expect(patterns_for(build_repo(files), frontend: false))
         .to eq(["app/javascript/components/ui/** linguist-vendored"])
@@ -109,7 +109,7 @@ RSpec.describe ThisIsRuby::Rules do
   end
 
   describe "frontend sources" do
-    it "are vendored by default, and kept by --no-frontend" do
+    it "are vendored by default, and kept by --fair" do
       repo = build_repo("app/javascript/pages/home.tsx" => "export default function Home() {}")
 
       expect(patterns_for(repo)).to eq(["app/javascript/** linguist-vendored"])

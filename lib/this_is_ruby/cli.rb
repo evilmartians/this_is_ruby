@@ -78,9 +78,9 @@ module ThisIsRuby
       parser = OptionParser.new do |opts|
         opts.banner = USAGE
         opts.on("--path DIR", "repository to inspect (default: .)") { |dir| @options[:path] = dir }
-        opts.on("--[no-]frontend", "mark hand-written frontend sources as vendored (default: yes)") { |on| @options[:frontend] = on }
-        # 0.1.x asked for this behaviour with a flag. It is the default now, so
-        # accept the old name rather than break anyone's CI step.
+        opts.on("--fair", "exclude only what a tool wrote or a generator copied in") { @options[:frontend] = false }
+        # 0.1.x asked for today's default with a flag. Accept the old name and
+        # do nothing, rather than break a CI step that still passes it.
         opts.on("--all-frontend", "deprecated alias, now the default") { @options[:frontend] = true }
         opts.on("--[no-]color", "colourise output") { |on| @options[:color] = on }
         opts.on("-v", "--version", "print the version") do

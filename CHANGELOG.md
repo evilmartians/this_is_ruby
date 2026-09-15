@@ -4,8 +4,8 @@
 
 - Frontend sources are vendored by default. Telling GitHub a project is Ruby is
   what the gem is for, and it read oddly to name that after a flag most people
-  would never pass. `--no-frontend` keeps them counted, for a repository whose
-  frontend really is the point. `--all-frontend` is still accepted and does
+  would never pass. `--fair` keeps them counted, marking only what a tool wrote
+  or a generator copied in, for a repository whose frontend really is the point. `--all-frontend` is still accepted and does
   nothing, so an existing CI step keeps working.
 - Reword the summary and description.
 
