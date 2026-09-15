@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "this_is_ruby"
+
+exit ThisIsRuby::CLI.call(ARGV)
