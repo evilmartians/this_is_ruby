@@ -50,7 +50,9 @@ On the same repository that marks `app/javascript/` as `linguist-vendored` and R
 The one line that matters is which attribute it uses. [Generated files are suppressed in diffs][docs]; vendored files are not. So `--all-frontend` emits `linguist-vendored`, every source file keeps showing up in full in pull requests, and the only thing that changes is the color of the bar at the top of the page:
 
 ```console
-$ git check-attr linguist-vendored linguist-generated -- app/javascript/pages/home/index.tsx app/javascript/pages/home/index.tsx: linguist-vendored: set app/javascript/pages/home/index.tsx: linguist-generated: unspecified
+$ git check-attr linguist-vendored linguist-generated -- app/javascript/pages/home/index.tsx
+app/javascript/pages/home/index.tsx: linguist-vendored: set
+app/javascript/pages/home/index.tsx: linguist-generated: unspecified
 ```
 
 ## A note on patterns
@@ -60,3 +62,6 @@ Directory rules emit `dir/**`, never `dir/*`. In gitignore syntax, which `.gitat
 ## License
 
 MIT.
+
+[irsk]: https://github.com/inertia-rails/react-starter-kit
+[docs]: https://github.com/github-linguist/linguist/blob/main/docs/overrides.md

@@ -32,7 +32,9 @@ module ThisIsRuby
 
     def call
       command = parse
-      return 0 unless command
+      # --help and --version leave nothing to run; bad input leaves nothing to
+      # run either, but must not look like success to a CI step.
+      return command if command.is_a?(Integer)
 
       repo = Repo.at(@options[:path])
       attributes = AttributesFile.new(repo.root.join(".gitattributes"))
@@ -49,12 +51,7 @@ module ThisIsRuby
 
     def apply(plan, attributes, report)
       report.call
-      before = attributes.current
-      after = attributes.render(plan.emissions)
-      return 0 if before == after
-
-      attributes.path.write(after)
-      report.wrote(display(attributes.path))
+      report.wrote(display(attributes.path)) if attributes.write(plan.emissions)
       0
     end
 
@@ -64,7 +61,7 @@ module ThisIsRuby
     end
 
     def check(plan, attributes, report)
-      return 0 if attributes.current == attributes.render(plan.emissions)
+      return 0 unless attributes.stale?(plan.emissions)
 
       report.call
       report.drift(display(attributes.path))
@@ -83,24 +80,31 @@ module ThisIsRuby
         opts.on("--path DIR", "repository to inspect (default: .)") { |dir| @options[:path] = dir }
         opts.on("--all-frontend", "also mark hand-written frontend sources as vendored") { @options[:all_frontend] = true }
         opts.on("--[no-]color", "colourise output") { |on| @options[:color] = on }
-        opts.on("-v", "--version", "print the version") {
+        opts.on("-v", "--version", "print the version") do
           @out.puts VERSION
-          return nil
-        }
-        opts.on("-h", "--help", "print this message") {
+          return 0
+        end
+        opts.on("-h", "--help", "print this message") do
           @out.puts opts
-          return nil
-        }
+          return 0
+        end
       end
       rest = parser.parse(@argv)
+      return refuse(parser, "one command at a time, got #{rest.join(" ")}") if rest.size > 1
+
       command = rest.first || "apply"
-      raise OptionParser::InvalidArgument, command unless COMMANDS.include?(command)
+      return refuse(parser, "unknown command #{command.inspect}") unless COMMANDS.include?(command)
 
       command
     rescue OptionParser::ParseError => error
-      @err.puts "this_is_ruby: #{error.message}"
+      refuse(parser, error.message)
+    end
+
+    # Returns the exit status, so a typo in a CI step fails instead of passing.
+    def refuse(parser, message)
+      @err.puts "this_is_ruby: #{message}"
       @err.puts parser
-      nil
+      1
     end
   end
 end

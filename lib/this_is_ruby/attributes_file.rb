@@ -3,8 +3,9 @@
 module ThisIsRuby
   # Reads and rewrites .gitattributes, touching only the block it owns.
   #
-  # Everything outside the markers is preserved byte for byte: Rails writes
-  # its own lines there, and so do people.
+  # Everything outside the markers is preserved: Rails writes its own lines
+  # there, and so do people. The block is rewritten where it already sits, so
+  # what someone put below it stays below it.
   class AttributesFile
     BEGIN_MARKER = "# --- this_is_ruby: begin ---"
     END_MARKER = "# --- this_is_ruby: end ---"
@@ -25,39 +26,64 @@ module ThisIsRuby
     def current = path.file? ? path.read : ""
 
     # Patterns already declared outside our block, as pattern => attributes.
-    # Rails 8.1 writes the error pages itself; when it has, we say nothing.
+    #
+    # Attributes keep their `-` or `!` prefix: an owner who wrote
+    # `public/404.html -linguist-generated` has spoken about that path just as
+    # deliberately as one who set it, and Plan reads both as "leave it alone".
     def existing_attributes
-      outside = current.sub(BLOCK, "")
-      outside.each_line.with_object({}) do |line, acc|
+      before, after = split
+      "#{before}#{after}".each_line.with_object({}) do |line, declared|
         body = line.split("#", 2).first.to_s.strip
         next if body.empty?
 
         pattern, *attributes = body.split(/\s+/)
-        (acc[pattern] ||= []).concat(attributes)
+        (declared[pattern] ||= []).concat(attributes)
       end
     end
 
     def render(emissions)
-      # Removing our block must not leave the blank line that separated it.
-      outside = current.sub(BLOCK, "").sub(/\n{2,}\z/, "\n")
-      return outside if emissions.empty?
+      before, after = split
+      join(before, emissions.empty? ? nil : block(emissions), after)
+    end
 
-      body = +""
-      body << BEGIN_MARKER << "\n"
+    def stale?(emissions) = render(emissions) != current
+
+    # Writes the file when the rendering differs, and says whether it did.
+    def write(emissions)
+      contents = render(emissions)
+      return false if contents == current
+
+      path.write(contents)
+      true
+    end
+
+    private
+
+    # The file around our block. With no block, all of it is "before".
+    def split
+      match = BLOCK.match(current)
+      match ? [match.pre_match, match.post_match] : [current, ""]
+    end
+
+    def block(emissions)
+      body = "#{BEGIN_MARKER}\n"
       PREAMBLE.each { |line| body << line << "\n" }
       emissions.chunk_while { |a, b| a.rule == b.rule }.each do |group|
         body << "\n# #{group.first.rule.summary}\n"
         group.each { |emission| body << emission.line << "\n" }
       end
       body << END_MARKER << "\n"
-
-      outside.empty? ? body : "#{outside}\n#{body}"
     end
 
-    def write(emissions)
-      contents = render(emissions)
-      path.write(contents)
-      contents
+    def join(*sections)
+      sections.compact.map { |section| tidy(section) }.reject(&:empty?).join("\n")
+    end
+
+    # One trailing newline and no leading blank lines, so the sections join
+    # with exactly one blank line between them however the file arrived.
+    def tidy(text)
+      trimmed = text.sub(/\A\n+/, "").sub(/\n*\z/, "")
+      trimmed.empty? ? "" : "#{trimmed}\n"
     end
   end
 end

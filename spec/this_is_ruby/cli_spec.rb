@@ -45,8 +45,35 @@ RSpec.describe ThisIsRuby::CLI do
     expect(err.string).to include("not a git repository")
   end
 
-  it "rejects an unknown command" do
-    expect(run("yolo")).to eq(0).or eq(1)
-    expect(err.string).to include("yolo")
+  describe "bad input" do
+    # A typo in a CI step has to fail. Exiting 0 here means `check` silently
+    # never runs and .gitattributes drifts unnoticed.
+    it "fails on an unknown command" do
+      expect(run("chekc")).to eq(1)
+      expect(err.string).to include("unknown command")
+      expect(repo.root.join(".gitattributes")).not_to exist
+    end
+
+    it "fails on an unknown option" do
+      expect(run("--reticulate")).to eq(1)
+      expect(err.string).to include("reticulate")
+    end
+
+    it "fails when given more than one command" do
+      expect(run("plan", "check")).to eq(1)
+      expect(err.string).to include("one command at a time")
+    end
+  end
+
+  describe "asking for nothing" do
+    it "succeeds for --help" do
+      expect(run("--help")).to eq(0)
+      expect(out.string).to include("Usage: this_is_ruby")
+    end
+
+    it "succeeds for --version" do
+      expect(run("--version")).to eq(0)
+      expect(out.string).to include(ThisIsRuby::VERSION)
+    end
   end
 end

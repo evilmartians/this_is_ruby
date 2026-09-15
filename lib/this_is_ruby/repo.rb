@@ -7,8 +7,8 @@ module ThisIsRuby
   # The git working tree under inspection.
   #
   # Only tracked files are considered. Linguist reads the repository, so a
-  # path git ignores is already invisible to it and needs no attribute --
-  # which is why a project that gitignores `coverage/`, as most do, gets
+  # path git ignores is already invisible to it and needs no attribute.
+  # That is why a project that gitignores `coverage/`, as most do, gets
   # nothing written about it.
   class Repo
     class NotAGitRepo < Error; end
@@ -20,7 +20,9 @@ module ThisIsRuby
     attr_reader :root
 
     def self.at(path)
-      out, status = Open3.capture2e("git", "-C", path.to_s, "rev-parse", "--show-toplevel")
+      # capture3, not capture2e: git writes warnings and GIT_TRACE output to
+      # stderr while still succeeding, and merging them corrupts the path.
+      out, _err, status = Open3.capture3("git", "-C", path.to_s, "rev-parse", "--show-toplevel")
       raise NotAGitRepo, "not a git repository: #{path}" unless status.success?
 
       new(out.strip)
@@ -33,7 +35,7 @@ module ThisIsRuby
     # Returns an Array of repo-relative paths, as git reports them.
     def tracked
       @tracked ||= begin
-        out, status = Open3.capture2("git", "-C", root.to_s, "ls-files", "-z")
+        out, _err, status = Open3.capture3("git", "-C", root.to_s, "ls-files", "-z")
         raise NotAGitRepo, "cannot list files in #{root}" unless status.success?
 
         out.split("\0").reject(&:empty?).freeze

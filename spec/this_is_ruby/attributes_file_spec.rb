@@ -15,10 +15,34 @@ RSpec.describe ThisIsRuby::AttributesFile do
   end
 
   it "produces the same file every time" do
-    first = attributes.write(emissions)
-    second = attributes.write(emissions)
+    attributes.write(emissions)
+    first = attributes.current
 
-    expect(second).to eq(first)
+    expect(attributes.write(emissions)).to be(false)
+    expect(attributes.current).to eq(first)
+  end
+
+  it "rewrites the block where it sits, leaving what is below it below" do
+    attributes.path.write("*.rb text\n")
+    attributes.write(emissions)
+    attributes.path.write("#{attributes.current}\n*.md linguist-documentation\n")
+    attributes.write(emissions)
+
+    lines = attributes.current.lines.map(&:chomp)
+    expect(lines.first).to eq("*.rb text")
+    expect(lines.last).to eq("*.md linguist-documentation")
+    expect(lines.index(described_class::END_MARKER)).to be < lines.index("*.md linguist-documentation")
+  end
+
+  it "settles after one run even with content on both sides" do
+    attributes.path.write("*.rb text\n")
+    attributes.write(emissions)
+    attributes.path.write("#{attributes.current}\n*.md linguist-documentation\n")
+    attributes.write(emissions)
+    settled = attributes.current
+
+    expect(attributes.write(emissions)).to be(false)
+    expect(attributes.current).to eq(settled)
   end
 
   it "keeps what Rails and people wrote around it" do
@@ -35,6 +59,14 @@ RSpec.describe ThisIsRuby::AttributesFile do
     attributes.write([])
 
     expect(attributes.current).to eq("*.rb text\n")
+  end
+
+  describe "#stale?" do
+    it "is true until the block is written, false after" do
+      expect(attributes.stale?(emissions)).to be(true)
+      attributes.write(emissions)
+      expect(attributes.stale?(emissions)).to be(false)
+    end
   end
 
   describe "#existing_attributes" do

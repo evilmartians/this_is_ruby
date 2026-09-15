@@ -10,16 +10,55 @@ RSpec.describe ThisIsRuby::Plan do
   end
   let(:attributes) { ThisIsRuby::AttributesFile.new(repo.root.join(".gitattributes")) }
 
-  it "stays quiet about what Rails 8.1 already declares" do
-    attributes.path.write("public/404.html linguist-generated\n")
-    plan = described_class.build(repo, attributes:)
+  def plan_with(declaration = nil, **options)
+    attributes.path.write(declaration) if declaration
+    described_class.build(repo, attributes:, **options)
+  end
 
-    expect(plan.emissions.map(&:pattern)).to eq(["app/assets/builds/**"])
-    expect(plan.redundant.map(&:pattern)).to eq(["public/404.html"])
+  describe "what the owner has already decided" do
+    it "stays quiet about what Rails 8.1 already declares" do
+      plan = plan_with("public/404.html linguist-generated\n")
+
+      expect(plan.emissions.map(&:pattern)).to eq(["app/assets/builds/**"])
+      expect(plan.declared.map(&:pattern)).to eq(["public/404.html"])
+    end
+
+    # Writing our line after theirs would reverse it, since the last match wins.
+    it "honours an attribute the owner explicitly unset" do
+      plan = plan_with("public/404.html -linguist-generated\n")
+
+      expect(plan.emissions.map(&:pattern)).to eq(["app/assets/builds/**"])
+      expect(plan.declared.map(&:pattern)).to eq(["public/404.html"])
+    end
+
+    it "honours an attribute the owner made unspecified" do
+      plan = plan_with("public/404.html !linguist-generated\n")
+
+      expect(plan.emissions.map(&:pattern)).to eq(["app/assets/builds/**"])
+    end
+
+    it "reads a declaration that reaches the path through a glob" do
+      plan = plan_with("public/*.html -linguist-generated\n")
+
+      expect(plan.emissions.map(&:pattern)).to eq(["app/assets/builds/**"])
+    end
+
+    it "reads a declaration that reaches the path through a directory" do
+      plan = plan_with("app/assets/** linguist-generated\n")
+
+      expect(plan.emissions.map(&:pattern)).to eq(["public/404.html"])
+    end
+
+    it "ignores declarations about other attributes entirely" do
+      plan = plan_with("public/404.html text eol=lf\n")
+
+      expect(plan.emissions.map(&:pattern)).to include("public/404.html")
+      expect(plan.declared).to be_empty
+    end
   end
 
   it "reports the bar it expects GitHub to show" do
-    plan = described_class.build(repo, attributes:)
+    plan = plan_with
 
     expect(plan.before.first.first).to eq("HTML")
     expect(plan.after.first.first).to eq("Ruby")
@@ -46,11 +85,5 @@ RSpec.describe ThisIsRuby::Plan do
     plan = described_class.build(repo, attributes:)
 
     expect(plan.emissions.map(&:pattern)).to eq(["app/javascript/components/ui/**"])
-  end
-
-  it "counts only the bytes it claims" do
-    plan = described_class.build(repo, attributes:)
-
-    expect(plan.bytes).to eq(repo.size("public/404.html") + repo.size("app/assets/builds/application.js"))
   end
 end

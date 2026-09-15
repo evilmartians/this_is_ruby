@@ -7,10 +7,10 @@ module ThisIsRuby
   # Rules never guess: when the evidence is not on disk they return nothing,
   # so a project that has no coverage report gets no line about one.
   #
-  # :safe rules describe files a tool produced. :frontend rules describe
-  # hand-written application code, and only run when the user asks for them
-  # with --all-frontend, because claiming authorship you do not have is a
-  # different thing from pointing at a build artefact.
+  # :safe rules find files a tool produced, and always run. :frontend rules
+  # find hand-written sources, and run only with --all-frontend, because
+  # excluding those is the owner's call about what their repository is rather
+  # than a fact about who typed the file.
   class Rule
     LEVELS = %i[safe frontend].freeze
 

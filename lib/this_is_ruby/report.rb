@@ -13,13 +13,13 @@ module ThisIsRuby
     end
 
     def call
-      if @plan.empty? && @plan.redundant.empty?
+      if @plan.empty? && @plan.declared.empty?
         say "Nothing to do. Linguist already counts this repository fairly."
         return
       end
 
       findings
-      redundant
+      declared
       language_bar
     end
 
@@ -46,11 +46,11 @@ module ThisIsRuby
       end
     end
 
-    def redundant
-      return if @plan.redundant.empty?
+    def declared
+      return if @plan.declared.empty?
 
-      say dim("Already declared in .gitattributes, left alone:")
-      @plan.redundant.each { |emission| say dim("  #{emission.pattern}") }
+      say dim("Already decided in .gitattributes, left alone:")
+      @plan.declared.each { |emission| say dim("  #{emission.pattern}") }
       say ""
     end
 
