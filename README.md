@@ -1,35 +1,8 @@
 # this_is_ruby
 
-GitHub decides a repository's language by counting bytes. A Rails app carries
-plenty of bytes it never authored, and when they outweigh the app's own Ruby,
-GitHub labels the repo HTML or TypeScript.
+GitHub decides a repository's language by counting bytes. Ruby code can often be outnumbered by sheer volume of JS/TS/HTML boilerplate. So GitHub labels the repo HTML or TypeScript.
 
-Linguist has always had the fix: `.gitattributes` overrides. Nobody maintains
-that file by hand. This gem writes it from what is actually in your repository.
-
-```console
-$ bundle exec this_is_ruby
-29 files will stop counting toward this repository's language bar:
-
-  error pages written by `rails new`  35.7 KB, 5 files
-    public/400.html linguist-generated
-    public/404.html linguist-generated
-    public/406-unsupported-browser.html linguist-generated
-    public/422.html linguist-generated
-    public/500.html linguist-generated
-
-  shadcn/ui components, copied in by its generator  80.3 KB, 24 files
-    app/javascript/components/ui/** linguist-vendored
-
-Estimated language bar (GitHub is the authority; this is a guide)
-
-                   now     after
-  TypeScript     62.3%     57.5%
-  Ruby           19.8%     33.9%
-  HTML           13.8%      1.8%
-
-Wrote .gitattributes. Commit it: Linguist only reads what is in the repository.
-```
+This gem gives you controls.
 
 ## Install
 
@@ -39,8 +12,6 @@ group :development do
 end
 ```
 
-Or `gem install this_is_ruby` to run it anywhere.
-
 ## Use
 
 ```console
@@ -49,17 +20,7 @@ $ this_is_ruby plan     # show what that would write, change nothing
 $ this_is_ruby check    # exit 1 when .gitattributes is out of date
 ```
 
-`check` belongs in CI, so the file cannot drift after someone adds a bundler.
-
-Everything lands inside a marked block. Whatever Rails or you wrote around it
-stays byte for byte:
-
-```
-# --- this_is_ruby: begin ---
-# Managed by this_is_ruby. Re-run it when your build setup changes.
-...
-# --- this_is_ruby: end ---
-```
+`check` belongs in CI
 
 ## What it recognises
 
@@ -74,40 +35,19 @@ stays byte for byte:
 | `db/structure.sql`, matching how Rails already treats `db/schema.rb` | `linguist-generated` |
 | shadcn/ui components, when `components.json` shows a generator put them there | `linguist-vendored` |
 
-It claims nothing without evidence on disk. A hand-written `public/404.html`
-keeps counting, because only the generated one says where it lives. A project
-with no `components.json` has ordinary components that someone wrote.
 
-It also skips what Linguist already excludes upstream, so `node_modules/`,
-`vendor/`, `.yarn/`, minified files and lockfiles never appear in the block.
+By default the gem only points at files a tool produced. On [inertia-rails/react-starter-kit][irsk] that moves TypeScript from 62.3% to 57.5% and leaves it the primary language.
 
-And it only writes about tracked files. If you gitignore `coverage/`, as most
-projects do, there is nothing to say about it.
+## Make it Ruby
 
-## Two answers, and you pick
-
-By default the gem only points at files a tool produced. On
-[inertia-rails/react-starter-kit][irsk] that moves TypeScript from 62.3% to
-57.5% and leaves it the primary language.
-
-That default answers "what is most of the bytes here". It is often not the
-same question as "what is this project". Ruby says in 30 lines what a
-frontend says in 300, so a byte count reads a Rails core with a React surface
-as a React project. If you think the important work in your repository is the
-Ruby, `.gitattributes` is the lever GitHub gives you to say so:
+If you think that despite a huge amount of hand-written JS/TS/HTML, the important work in your repository is Ruby, you can say so:
 
 ```console
 $ this_is_ruby --all-frontend
 ```
+On the same repository that marks `app/javascript/` as `linguist-vendored` and Ruby becomes 84.2%.
 
-On the same repository that marks `app/javascript/` as `linguist-vendored`
-and Ruby becomes 84.2%.
-
-The one line that matters is which attribute it uses.
-[Generated files are suppressed in diffs][docs]; vendored files are not. So
-`--all-frontend` emits `linguist-vendored`, every source file keeps showing
-up in full in pull requests, and the only thing that changes is the colour of
-the bar at the top of the page:
+The one line that matters is which attribute it uses. [Generated files are suppressed in diffs][docs]; vendored files are not. So `--all-frontend` emits `linguist-vendored`, every source file keeps showing up in full in pull requests, and the only thing that changes is the color of the bar at the top of the page:
 
 ```console
 $ git check-attr linguist-vendored linguist-generated -- app/javascript/pages/home/index.tsx
@@ -115,32 +55,10 @@ app/javascript/pages/home/index.tsx: linguist-vendored: set
 app/javascript/pages/home/index.tsx: linguist-generated: unspecified
 ```
 
-## Why any of this exists
-
-While measuring Ruby's decline on GitHub we found that every app generated by
-Rails 8.0 ships about 36 KB of error pages against roughly 24 KB of Ruby, so a
-fresh `rails new` is labelled HTML on the day it is pushed. That one is now
-fixed upstream in [rails/rails#58693][rails], shipping in Rails 8.1. Apps
-generated before then, and any app made with `--skip-git`, still need the
-lines. [github-linguist/linguist#8191][linguist] handles the case where no
-`.gitattributes` exists at all.
-
-The rest of the list came from sampling 60,000 HTML-labelled repositories and
-reading what had actually outvoted the Ruby in the Rails apps among them. The
-most common single cause was a committed SimpleCov report.
-
 ## A note on patterns
 
-Directory rules emit `dir/**`, never `dir/*`. In gitignore syntax, which
-`.gitattributes` shares, a single star does not cross a slash, so `vendor/*`
-reaches `vendor/turbo.js` and never `vendor/javascript/turbo.js`. There is a
-spec that asks `git check-attr` rather than trusting the documentation.
+Directory rules emit `dir/**`, never `dir/*`. In gitignore syntax, which `.gitattributes` shares, a single star does not cross a slash, so `vendor/*` reaches `vendor/turbo.js` and never `vendor/javascript/turbo.js`. There is a spec that asks `git check-attr` rather than trusting the documentation.
 
 ## License
 
 MIT.
-
-[irsk]: https://github.com/inertia-rails/react-starter-kit
-[docs]: https://github.com/github-linguist/linguist/blob/main/docs/overrides.md
-[rails]: https://github.com/rails/rails/pull/58693
-[linguist]: https://github.com/github-linguist/linguist/pull/8191
