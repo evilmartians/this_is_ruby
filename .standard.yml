@@ -1,0 +1,3 @@
+# Match required_ruby_version: standardrb rewrote `_1` to `it`, which only
+# exists in Ruby 3.4, and the gem supports 3.2.
+ruby_version: 3.2

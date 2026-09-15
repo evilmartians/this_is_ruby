@@ -80,9 +80,9 @@ module ThisIsRuby
     def parse
       parser = OptionParser.new do |opts|
         opts.banner = USAGE
-        opts.on("--path DIR", "repository to inspect (default: .)") { @options[:path] = it }
+        opts.on("--path DIR", "repository to inspect (default: .)") { |dir| @options[:path] = dir }
         opts.on("--all-frontend", "also mark hand-written frontend sources as vendored") { @options[:all_frontend] = true }
-        opts.on("--[no-]color", "colourise output") { @options[:color] = it }
+        opts.on("--[no-]color", "colourise output") { |on| @options[:color] = on }
         opts.on("-v", "--version", "print the version") {
           @out.puts VERSION
           return nil
