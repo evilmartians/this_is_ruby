@@ -65,8 +65,12 @@ module ThisIsRuby
       @claimed_paths ||= emissions.flat_map(&:paths).to_set
     end
 
-    def before = @before ||= LanguageEstimate.of(repo)
+    # The bar without our block: what GitHub reports today, minus the paths this
+    # run is claiming. Asking git means Rails' own `db/schema.rb` line and
+    # anything hand-written are honoured, while re-running on a repository we
+    # already converted still shows the contrast rather than "nothing changes".
+    def before = @before ||= LanguageEstimate.of(repo, excluding: repo.already_excluded - claimed_paths)
 
-    def after = @after ||= LanguageEstimate.of(repo, excluding: claimed_paths)
+    def after = @after ||= LanguageEstimate.of(repo, excluding: repo.already_excluded | claimed_paths)
   end
 end

@@ -17,6 +17,9 @@ module ThisIsRuby
     # markers we check for all sit in the first few lines.
     PEEK_BYTES = 4096
 
+    # The attributes that take a file out of GitHub's language statistics.
+    LINGUIST_EXCLUSIONS = %w[linguist-generated linguist-vendored linguist-documentation].freeze
+
     attr_reader :root
 
     def self.at(path)
@@ -55,12 +58,35 @@ module ThisIsRuby
       full.open("rb") { |io| io.read(PEEK_BYTES) }
     end
 
+    # Paths git already reports as excluded from Linguist's counts, whoever
+    # declared them: our own block, the lines Rails generates, or something
+    # written by hand. Resolving the patterns ourselves would mean
+    # reimplementing gitignore matching, so ask git, which owns the answer.
+    def already_excluded
+      @already_excluded ||= begin
+        paths = tracked
+        paths.empty? ? Set.new : Set.new(check_attr(paths))
+      end
+    end
+
     def size(path)
       full = root.join(path)
       full.file? ? full.size : 0
     end
 
     private
+
+    # `check-attr --stdin -z` reads NUL-separated paths and answers with
+    # NUL-separated (path, attribute, value) triples.
+    def check_attr(paths)
+      out, _err, status = Open3.capture3(
+        "git", "-C", root.to_s, "check-attr", "--stdin", "-z", *LINGUIST_EXCLUSIONS,
+        stdin_data: paths.join("\0")
+      )
+      return [] unless status.success?
+
+      out.split("\0").each_slice(3).filter_map { |path, _attribute, value| path if value == "set" }
+    end
 
     def tracked_set
       @tracked_set ||= tracked.to_set

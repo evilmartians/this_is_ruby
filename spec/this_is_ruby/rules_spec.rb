@@ -1,5 +1,24 @@
 # frozen_string_literal: true
 
+RSpec.describe ThisIsRuby::Repo do
+  describe "#already_excluded" do
+    it "asks git, so every pattern shape resolves the way git resolves it" do
+      repo = build_repo(
+        ".gitattributes" => "deep/** linguist-vendored\ndb/schema.rb linguist-generated\n",
+        "deep/nested/far/away.tsx" => "//",
+        "db/schema.rb" => "# schema",
+        "app/models/user.rb" => "class User; end"
+      )
+
+      expect(repo.already_excluded).to contain_exactly("deep/nested/far/away.tsx", "db/schema.rb")
+    end
+
+    it "is empty when nothing is declared" do
+      expect(build_repo("app/models/user.rb" => "class User; end").already_excluded).to be_empty
+    end
+  end
+end
+
 RSpec.describe ThisIsRuby::Rules do
   def patterns_for(repo, all_frontend: false)
     described_class.for_level(all_frontend:)

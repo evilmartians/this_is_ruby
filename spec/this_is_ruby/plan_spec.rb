@@ -57,6 +57,26 @@ RSpec.describe ThisIsRuby::Plan do
     end
   end
 
+  describe "the language bar" do
+    it "ignores our own block, so a second run still shows the contrast" do
+      attributes.write(described_class.build(repo, attributes:).emissions)
+      plan = described_class.build(repo, attributes:)
+
+      # The block is on disk now, so git reports public/404.html as excluded.
+      expect(repo.already_excluded).to include("public/404.html")
+      # "now" must still be the bar without it.
+      expect(plan.before.first.first).to eq("HTML")
+      expect(plan.after.first.first).to eq("Ruby")
+    end
+
+    it "honours an exclusion somebody else declared" do
+      attributes.path.write("app/models/** linguist-vendored\n")
+      plan = described_class.build(repo, attributes:)
+
+      expect(plan.before.map(&:first)).not_to include("Ruby")
+    end
+  end
+
   it "reports the bar it expects GitHub to show" do
     plan = plan_with
 

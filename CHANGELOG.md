@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1
+
+- The "now" column no longer counts files that are already out of GitHub's
+  language bar. It asks `git check-attr`, so Rails' own `db/schema.rb` line and
+  anything written by hand are honoured, and it subtracts only what this run
+  claims, so re-running on a repository already converted still shows the
+  contrast rather than reporting that nothing would change.
+
 ## 0.1.0
 
 Initial release.
@@ -8,18 +16,8 @@ Initial release.
   Webpacker and Vite builds, SimpleCov reports, SQL structure dumps and
   shadcn/ui components.
 - Writes a managed block in `.gitattributes`, leaving the rest of the file
-  untouched, and stays quiet about anything already declared there.
-- `plan`, `apply` and `check` commands; `--all-frontend` opt-in.
-
-## Unreleased
-
-- Exit 1 on an unknown command or option instead of 0, so a typo in a CI step
-  fails rather than silently skipping `check`.
-- Leave a path alone when its Linguist attribute is already decided, including
-  when it was explicitly unset (`-linguist-generated`) or made unspecified
-  (`!linguist-generated`). Writing our line after such a declaration reversed
-  it, because the last match wins.
-- Rewrite the managed block where it already sits, so content below it stays
-  below it.
-- Read `git rev-parse` from stdout alone: with `GIT_TRACE` set, or on any git
-  warning, the merged stream became part of the repository root.
+  untouched, and stays quiet about anything already decided there, including an
+  attribute the owner explicitly unset.
+- Rewrites the block where it sits, so content below it stays below it.
+- `plan`, `apply` and `check` commands; `--all-frontend` opt-in, which uses
+  `linguist-vendored` so diffs keep working.
