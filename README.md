@@ -36,7 +36,7 @@ $ this_is_ruby check    # exit 1 when .gitattributes is out of date
 | shadcn/ui components, when `components.json` shows a generator put them there | `linguist-vendored` |
 
 
-By default the gem only points at files a tool produced. On [inertia-rails/react-starter-kit][irsk] that moves TypeScript from 62.3% to 57.5% and leaves it the primary language.
+By default the gem only points at files a tool produced. On [inertia-rails/react-starter-kit][irsk], where GitHub counts TypeScript at 60.6%, that clears the HTML but leaves TypeScript the primary language.
 
 ## Make it Ruby
 
@@ -45,7 +45,11 @@ If you think that despite a huge amount of hand-written JS/TS/HTML, the importan
 ```console
 $ this_is_ruby --all-frontend
 ```
-On the same repository that marks `app/javascript/` as `linguist-vendored` and Ruby becomes 84.2%.
+On the same repository that marks `app/javascript/` as `linguist-vendored`, and
+GitHub then counts it as **82.6% Ruby, 1.1% TypeScript**. That is not an
+estimate: [irinanazarova/react-starter-kit-this-is-ruby][demo] is a fork of the
+kit whose only change is the sixteen lines this command wrote. Compare its
+language bar with [the upstream one][irsk].
 
 The one line that matters is which attribute it uses. [Generated files are suppressed in diffs][docs]; vendored files are not. So `--all-frontend` emits `linguist-vendored`, every source file keeps showing up in full in pull requests, and the only thing that changes is the color of the bar at the top of the page:
 
@@ -88,3 +92,4 @@ MIT.
 
 [irsk]: https://github.com/inertia-rails/react-starter-kit
 [docs]: https://github.com/github-linguist/linguist/blob/main/docs/overrides.md
+[demo]: https://github.com/irinanazarova/react-starter-kit-this-is-ruby
