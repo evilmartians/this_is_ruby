@@ -25,6 +25,29 @@ RSpec.describe ThisIsRuby::Plan do
     expect(plan.after.first.first).to eq("Ruby")
   end
 
+  it "drops a pattern a broader one already covers" do
+    repo = build_repo(
+      "components.json" => %({"aliases":{"ui":"@/components/ui"}}),
+      "app/javascript/components/ui/button.tsx" => "export const Button = () => null",
+      "app/javascript/pages/home.tsx" => "export default function Home() {}"
+    )
+    attributes = ThisIsRuby::AttributesFile.new(repo.root.join(".gitattributes"))
+    plan = described_class.build(repo, attributes:, all_frontend: true)
+
+    expect(plan.emissions.map(&:pattern)).to eq(["app/javascript/**"])
+  end
+
+  it "keeps a narrower pattern when nothing broader covers it" do
+    repo = build_repo(
+      "components.json" => %({"aliases":{"ui":"@/components/ui"}}),
+      "app/javascript/components/ui/button.tsx" => "export const Button = () => null"
+    )
+    attributes = ThisIsRuby::AttributesFile.new(repo.root.join(".gitattributes"))
+    plan = described_class.build(repo, attributes:)
+
+    expect(plan.emissions.map(&:pattern)).to eq(["app/javascript/components/ui/**"])
+  end
+
   it "counts only the bytes it claims" do
     plan = described_class.build(repo, attributes:)
 

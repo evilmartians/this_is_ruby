@@ -9,7 +9,7 @@ that file by hand. This gem writes it from what is actually in your repository.
 
 ```console
 $ bundle exec this_is_ruby
-29 files Linguist counts that no one in this project wrote:
+29 files will stop counting toward this repository's language bar:
 
   error pages written by `rails new`  35.7 KB, 5 files
     public/400.html linguist-generated
@@ -84,25 +84,36 @@ It also skips what Linguist already excludes upstream, so `node_modules/`,
 And it only writes about tracked files. If you gitignore `coverage/`, as most
 projects do, there is nothing to say about it.
 
-## What it will not do for you
+## Two answers, and you pick
 
-Run it on a repository that really is mostly TypeScript and it will say so.
-On [inertia-rails/react-starter-kit][irsk] the honest rules move TypeScript
-from 62.3% to 57.5% and it stays the primary language, which is correct: it is
-a React starter kit.
+By default the gem only points at files a tool produced. On
+[inertia-rails/react-starter-kit][irsk] that moves TypeScript from 62.3% to
+57.5% and leaves it the primary language.
 
-If you want the other answer anyway, ask for it:
+That default answers "what is most of the bytes here". It is often not the
+same question as "what is this project". Ruby says in 30 lines what a
+frontend says in 300, so a byte count reads a Rails core with a React surface
+as a React project. If you think the important work in your repository is the
+Ruby, `.gitattributes` is the lever GitHub gives you to say so:
 
 ```console
 $ this_is_ruby --all-frontend
 ```
 
-That marks `app/javascript/`, `app/frontend/` and `frontend/` as
-`linguist-vendored`, and on the same repo Ruby goes to 84.2%. Two things to
-know before you use it. It is a claim about authorship that is probably not
-true. And it is deliberately `linguist-vendored` rather than
-`linguist-generated`, because [generated files are suppressed in diffs][docs]
-and a gem should not quietly break your code review to win a language badge.
+On the same repository that marks `app/javascript/` as `linguist-vendored`
+and Ruby becomes 84.2%.
+
+The one line that matters is which attribute it uses.
+[Generated files are suppressed in diffs][docs]; vendored files are not. So
+`--all-frontend` emits `linguist-vendored`, every source file keeps showing
+up in full in pull requests, and the only thing that changes is the colour of
+the bar at the top of the page:
+
+```console
+$ git check-attr linguist-vendored linguist-generated -- app/javascript/pages/home/index.tsx
+app/javascript/pages/home/index.tsx: linguist-vendored: set
+app/javascript/pages/home/index.tsx: linguist-generated: unspecified
+```
 
 ## Why any of this exists
 

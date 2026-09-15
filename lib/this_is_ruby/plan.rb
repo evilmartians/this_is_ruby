@@ -14,7 +14,21 @@ module ThisIsRuby
       redundant, emissions = found.partition do |emission|
         (declared.fetch(emission.pattern, EMPTY) & LINGUIST_ATTRIBUTES).any?
       end
-      new(repo:, emissions:, redundant:)
+      new(repo:, emissions: prune(emissions), redundant:)
+    end
+
+    # Drops a pattern when a broader one already carries the same attribute:
+    # once `app/javascript/**` is vendored, saying so again about
+    # `app/javascript/components/ui/**` only makes the file longer.
+    def self.prune(emissions)
+      emissions.reject do |emission|
+        emissions.any? do |other|
+          next false unless other.pattern.end_with?("**")
+          next false if other.pattern == emission.pattern || other.attribute != emission.attribute
+
+          emission.pattern.start_with?(other.pattern.delete_suffix("**"))
+        end
+      end
     end
 
     def initialize(repo:, emissions:, redundant:)

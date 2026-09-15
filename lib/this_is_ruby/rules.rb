@@ -121,7 +121,7 @@ module ThisIsRuby
       Rule.new(
         key: :frontend_sources,
         attribute: "linguist-vendored",
-        summary: "frontend sources (--all-frontend: a stats-only claim)",
+        summary: "frontend sources, excluded at your request (--all-frontend)",
         level: :frontend
       ) do |repo|
         present = FRONTEND_ROOTS.select { |dir| under(repo, dir).any? }

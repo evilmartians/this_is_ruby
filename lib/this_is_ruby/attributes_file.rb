@@ -12,8 +12,8 @@ module ThisIsRuby
 
     PREAMBLE = [
       "# Managed by this_is_ruby. Re-run it when your build setup changes.",
-      "# Every path below is counted by GitHub Linguist and written by a tool,",
-      "# not by hand. Edit above or below this block, never inside it."
+      "# Every path below is excluded from this repository's language stats.",
+      "# Edit above or below this block, never inside it."
     ].freeze
 
     attr_reader :path

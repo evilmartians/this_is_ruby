@@ -36,7 +36,8 @@ module ThisIsRuby
     def findings
       return if @plan.empty?
 
-      say "#{bold(@plan.emissions.sum { |e| e.paths.size })} files Linguist counts that no one in this project wrote:", ""
+      count = @plan.emissions.sum { |e| e.paths.size }
+      say "#{bold(count)} files will stop counting toward this repository's language bar:", ""
       @plan.emissions.chunk_while { |a, b| a.rule == b.rule }.each do |group|
         header = group.first.rule.summary
         say "  #{bold(header)}  #{dim("#{human(group.sum { |e| e.bytes(@plan.repo) })}, #{group.sum { |e| e.paths.size }} files")}"
