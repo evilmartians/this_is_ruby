@@ -55,6 +55,29 @@ app/javascript/pages/home/index.tsx: linguist-vendored: set
 app/javascript/pages/home/index.tsx: linguist-generated: unspecified
 ```
 
+## Side effects
+
+`linguist-*` attributes are a GitHub convention, and plain git does not act on
+them. Your local `git diff`, your merges, your CI and every checkout stay
+byte-for-byte what they were. Away from GitHub's own pages, nothing changes.
+
+On GitHub itself:
+
+- **`linguist-generated` collapses the file in diffs.** Linguist's docs put it
+  plainly: these files "are suppressed in diffs". Reviewers get a "Load diff"
+  button instead of the patch. The gem uses this attribute only for tool
+  output; everything hand-written gets `linguist-vendored`, which leaves diffs
+  alone. That is why `--all-frontend` vendors your frontend rather than
+  marking it generated.
+- **Code search still indexes the files.** They stay findable, and GitHub adds
+  `is:generated` and `is:vendored` filters, so a query written as
+  `-is:vendored` will skip them.
+- **Syntax highlighting is untouched.** Highlighting follows
+  `linguist-language=`, which this gem never writes.
+
+Nothing is deleted, moved or rewritten. The files stay in the repository and
+in its history, and GitHub only reads `.gitattributes` once you commit it.
+
 ## A note on patterns
 
 Directory rules emit `dir/**`, never `dir/*`. In gitignore syntax, which `.gitattributes` shares, a single star does not cross a slash, so `vendor/*` reaches `vendor/turbo.js` and never `vendor/javascript/turbo.js`. There is a spec that asks `git check-attr` rather than trusting the documentation.
