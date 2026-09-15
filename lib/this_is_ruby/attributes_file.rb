@@ -11,12 +11,6 @@ module ThisIsRuby
     END_MARKER = "# --- this_is_ruby: end ---"
     BLOCK = /^#{Regexp.escape(BEGIN_MARKER)}\n.*?^#{Regexp.escape(END_MARKER)}\n?/m
 
-    PREAMBLE = [
-      "# Managed by this_is_ruby. Re-run it when your build setup changes.",
-      "# Every path below is excluded from this repository's language stats.",
-      "# Edit above or below this block, never inside it."
-    ].freeze
-
     attr_reader :path
 
     def initialize(path)
@@ -65,13 +59,12 @@ module ThisIsRuby
       match ? [match.pre_match, match.post_match] : [current, ""]
     end
 
+    # Just the patterns, between two markers that name the gem. What each rule
+    # is for belongs in the report and the README, where there is room to say
+    # it properly, rather than as a comment in someone else's file.
     def block(emissions)
       body = "#{BEGIN_MARKER}\n"
-      PREAMBLE.each { |line| body << line << "\n" }
-      emissions.chunk_while { |a, b| a.rule == b.rule }.each do |group|
-        body << "\n# #{group.first.rule.summary}\n"
-        group.each { |emission| body << emission.line << "\n" }
-      end
+      emissions.each { |emission| body << emission.line << "\n" }
       body << END_MARKER << "\n"
     end
 

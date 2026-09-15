@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+- The managed block is now just the patterns between its two markers, down from
+  16 lines to 8. The preamble was the block explaining itself on top of a marker
+  that already names the gem, and the per-group comments repeated what the
+  report says at more length. `check` reports the file as out of date once after
+  upgrading; re-running writes the shorter block.
+
 ## 0.2.0
 
 - Frontend sources are vendored by default. Telling GitHub a project is Ruby is
