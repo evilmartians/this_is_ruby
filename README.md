@@ -1,5 +1,8 @@
 # this_is_ruby
 
+[![Gem](https://img.shields.io/gem/v/this_is_ruby)](https://rubygems.org/gems/this_is_ruby)
+[![CI](https://github.com/evilmartians/this_is_ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/evilmartians/this_is_ruby/actions/workflows/ci.yml)
+
 GitHub decides a repository's language by counting bytes. Ruby code can often be outnumbered by sheer volume of JS/TS/HTML boilerplate. So GitHub labels the repo HTML or TypeScript.
 
 This gem gives you controls.
@@ -11,6 +14,9 @@ group :development do
   gem "this_is_ruby", require: false
 end
 ```
+
+Or `gem install this_is_ruby` to run it against any repository without adding
+it to a project.
 
 ## Use
 
